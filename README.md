@@ -393,6 +393,7 @@ Configure from lua suggested, The default setup:
 
 ```lua
 require('go').setup({
+  go='go', -- go command, can be go[default] or go1.18beta1
   goimport='gopls', -- goimport command, can be gopls[default] or goimport
   gofmt = 'gofumpt', --gofmt cmd,
   max_line_len = 120, -- max line length in goline format

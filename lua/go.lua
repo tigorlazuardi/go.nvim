@@ -1,6 +1,7 @@
 -- some of commands extracted from gopher.vim
 local go = {}
 _GO_NVIM_CFG = {
+  go = "go", -- set to go1.18beta1 if necessary
   goimport = "gopls", -- if set to 'gopls' will use gopls format, also goimport
   fillstruct = "gopls",
   gofmt = "gofumpt", -- if set to gopls will use gopls format
@@ -12,13 +13,13 @@ _GO_NVIM_CFG = {
   verbose = false,
   log_path = vim.fn.expand("$HOME") .. "/tmp/gonvim.log",
   lsp_cfg = false, -- false: do nothing
-                   -- true: apply non-default gopls setup defined in go/lsp.lua
-                   -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
+  -- true: apply non-default gopls setup defined in go/lsp.lua
+  -- if lsp_cfg is a table, merge table with with non-default gopls setup in go/lsp.lua, e.g.
   lsp_gofumpt = false, -- true: set default gofmt in gopls format to gofumpt
   lsp_on_attach = nil, -- nil: use on_attach function defined in go/lsp.lua for gopls,
-                       --      when lsp_cfg is true
-                       -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
-                       --                                 when lsp_cfg is true
+  --      when lsp_cfg is true
+  -- if lsp_on_attach is a function: use this function as on_attach function for gopls,
+  --                                 when lsp_cfg is true
   lsp_diag_hdlr = true, -- hook lsp diag handler
   lsp_codelens = true,
   gopls_remote_auto = true,
@@ -59,17 +60,24 @@ function go.setup(cfg)
   vim.cmd([[command! GoFmt lua require("go.format").gofmt()]])
   vim.cmd([[command! -nargs=* GoImport lua require("go.format").goimport(<f-args>)]])
 
-  vim.cmd([[command! GoGenerate       :setl makeprg=go\ generate | :GoMake]])
-  vim.cmd(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=go\ build | lua require'go.asyncmake'.make(<f-args>)]]
+  local gobin = _GO_NVIM_CFG.go
+  local cmd = string.format([[command! GoGenerate       :setl makeprg=%s\ generate | :GoMake]], gobin)
+  vim.cmd(cmd)
+  cmd = string.format(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoBuild :setl makeprg=%s\ build | lua require'go.asyncmake'.make(<f-args>)]],
+    gobin
   )
-
-  vim.cmd(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=go\ vet | lua require'go.asyncmake'.make(<f-args>)]]
+  vim.cmd(cmd)
+  cmd = string.format(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoVet :setl makeprg=%s\ vet | lua require'go.asyncmake'.make(<f-args>)]],
+    gobin
   )
-  vim.cmd(
-    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=go\ run | lua require'go.asyncmake'.make(<f-args>)]]
+  vim.cmd(cmd)
+  cmd = string.format(
+    [[command! -nargs=* -complete=custom,v:lua.package.loaded.go.package_complete GoRun   :setl makeprg=%s\ run | lua require'go.asyncmake'.make(<f-args>)]],
+    gobin
   )
+  vim.cmd(cmd)
   -- if you want to output to quickfix
   -- vim.cmd(
   --     [[command! -nargs=* GoTest  :setl makeprg=go\ test\ -v\ ./...| lua require'go.asyncmake'.make(<f-args>)]])
@@ -166,7 +174,7 @@ function go.setup(cfg)
       require("go.lsp_diag")
     end
   elseif not _GO_NVIM_CFG.lsp_cfg and _GO_NVIM_CFG.lsp_on_attach then
-    vim.notify('lsp_on_attach ignored, because lsp_cfg is false', vim.lsp.log_levels.WARN)
+    vim.notify("lsp_on_attach ignored, because lsp_cfg is false", vim.lsp.log_levels.WARN)
   end
   require("go.coverage").highlight()
   if _GO_NVIM_CFG.lsp_codelens then
