@@ -22,6 +22,7 @@ The plugin covers most features required for a gopher.
   errors...
 - Go to alternative go file (between test and source)
 - Test with ginkgo, richgo inside floaterm (to enable floaterm, guihua.lua has to be installed)
+- Go 1.18beta1 support, check go1.18 branch
 
 ## Installation
 
@@ -96,19 +97,27 @@ The plugin provides code format, by default is goline + gofumpt (stricter versio
 Use following code to format go code
 
 ```lua
-require("go.format").gofmt()  -- format only
+require("go.format").gofmt()  -- gofmt only
 require("go.format").goimport()  -- goimport + gofmt
 ```
 
-To config format on save, in your init.lua:
+### Format on save
+
+To config format on save, add one of the following to your init.lua:
+
+#### Run gofmt on save
 
 ```lua
--- Format on save
+-- Run gofmt on save
 vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').gofmt() ]], false)
 
--- Import on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
+```
 
+#### Run gofmt + goimport on save
+
+```lua
+-- Run gofmt + goimport on save
+vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
 
 ```
 
