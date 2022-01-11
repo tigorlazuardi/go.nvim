@@ -26,6 +26,7 @@ _GO_NVIM_CFG = {
   gocoverage_sign = "█",
   gocoverage_sign_priority = 5,
   dap_debug = true,
+  dap_debug_keymap = true,
   textobjects = true,
   dap_debug_gui = true,
   dap_vt = true, -- false, true and 'all frames'
