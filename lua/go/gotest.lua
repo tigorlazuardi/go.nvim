@@ -225,7 +225,7 @@ M.test_fun = function(...)
     vim.list_extend(cmd, bench_opts)
   else
     table.insert(cmd, "-run")
-    table.insert(cmd, [[^]] .. ns.name)
+    table.insert(cmd, [[^]] .. ns.name .. [[$]])
   end
   table.insert(cmd, fpath)
 
