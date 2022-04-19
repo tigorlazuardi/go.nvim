@@ -25,6 +25,7 @@ local function get_struct_name()
   local scope_tree = ts_locals.get_scope_tree(cursor_node, 0)
   local node
   for _, scope in ipairs(scope_tree) do
+    vim.notify(vim.inspect(scope:type()))
     if scope:type() == "type_declaration" then
       node = scope
       break
