@@ -45,15 +45,6 @@ local function get_struct_name()
   local name_field = type_spec:field("name")[1]
   local name = vim.treesitter.query.get_node_text(name_field, 0)
   return get_initials(name) .. " *" .. name
-
-  -- local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  -- local name = require("go.ts.go").get_struct_node_at_pos(row, col)
-  -- if name == nil then
-  --   print("put cursor on struct or specify a receiver")
-  -- end
-  -- utils.log(name)
-  -- name = name.name
-  -- return string.lower(name) .. " *" .. name
 end
 
 local run = function(...)
