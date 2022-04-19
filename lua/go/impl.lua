@@ -1,18 +1,52 @@
+local ts_utils = require("nvim-treesitter.ts_utils")
+local ts_locals = require("nvim-treesitter.locals")
+
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require("go.utils")
 
 local impl = "impl"
+
+---gets initial value of a camel case / pascal case string
+---@param str string
+local function get_initials(str)
+  str = str:gsub("^%l", string.upper)
+  local a = {}
+  str:gsub("%u", function(c)
+    table.insert(a, c:lower())
+  end)
+
+  return table.concat(a, "")
+end
+
 -- GoImpl f *Foo io.Writer
 -- use ts to get name
 local function get_struct_name()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local name = require("go.ts.go").get_struct_node_at_pos(row, col)
-  if name == nil then
-    print("put cursor on struct or specify a receiver")
+  local cursor_node = ts_utils.get_node_at_cursor()
+  local scope_tree = ts_locals.get_scope_tree(cursor_node, 0)
+  local node
+  for _, scope in ipairs(scope_tree) do
+    if scope:type() == "type_declaration" then
+      node = scope
+      break
+    end
   end
-  utils.log(name)
-  name = name.name
-  return string.lower(name) .. " *" .. name
+
+  assert(node, "cursor is not currently in a type declaration section")
+
+  local type_spec = node:child(1)
+  assert(type_spec, "type_spec not found in type declaration of current node")
+  local name_field = type_spec:field("name")
+  local name = vim.treesitter.query.get_node_text(name_field)[1]
+  return get_initials(name) .. " *" .. name
+
+  -- local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  -- local name = require("go.ts.go").get_struct_node_at_pos(row, col)
+  -- if name == nil then
+  --   print("put cursor on struct or specify a receiver")
+  -- end
+  -- utils.log(name)
+  -- name = name.name
+  -- return string.lower(name) .. " *" .. name
 end
 
 local run = function(...)
