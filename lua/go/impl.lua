@@ -45,7 +45,7 @@ local function get_struct_name()
   end
 
   local type_spec = node:child(1)
-  local name_field = type_spec:field("name")
+  local name_field = type_spec:field("name")[1]
   local name = vim.treesitter.query.get_node_text(name_field)[1]
   return get_initials(name) .. " *" .. name
 
