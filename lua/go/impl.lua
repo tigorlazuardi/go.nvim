@@ -1,5 +1,5 @@
 local ts_utils = require("nvim-treesitter.ts_utils")
-local ts_locals = require("nvim-treesitter.locals")
+-- local ts_locals = require("nvim-treesitter.locals")
 
 -- local ts_utils = require 'nvim-treesitter.ts_utils'
 local utils = require("go.utils")
@@ -22,22 +22,29 @@ end
 -- use ts to get name
 local function get_struct_name()
   local cursor_node = ts_utils.get_node_at_cursor()
-  local scope_tree = ts_locals.get_scope_tree(cursor_node, 0)
+  if cursor_node == nil then
+    vim.notify("No node found on cursor", "error", { title = "Treesitter Query Error" })
+    return nil
+  end
+  local parent = cursor_node:parent()
   local node
-  for _, scope in ipairs(scope_tree) do
-    vim.notify(vim.inspect(scope:type()))
-    if scope:type() == "type_declaration" then
-      node = scope
+  while parent do
+    vim.notify(vim.inspect(parent:type()))
+    if parent:type() == "type_declaration" then
+      node = parent
       break
     end
+    parent = parent:parent()
   end
 
   vim.notify(vim.inspect(node))
 
-  assert(node, "cursor is not currently in a type declaration section")
+  if node == nil then
+    vim.notify("cursor is not currently in a type declaration section", "error", { title = "Treesitter Query Error" })
+    return nil
+  end
 
   local type_spec = node:child(1)
-  assert(type_spec, "type_spec not found in type declaration of current node")
   local name_field = type_spec:field("name")
   local name = vim.treesitter.query.get_node_text(name_field)[1]
   return get_initials(name) .. " *" .. name
@@ -61,6 +68,9 @@ local run = function(...)
   local arg = { ... }
   if #arg == 0 then
     recv = get_struct_name()
+    if not recv then
+      return
+    end
 
     iface = vim.fn.input("Impl: generating method stubs for interface: ")
     vim.cmd("redraw!")
@@ -71,6 +81,9 @@ local run = function(...)
   elseif #arg == 1 then
     -- " i.e: ':GoImpl io.Writer'
     recv = get_struct_name()
+    if not recv then
+      return
+    end
     iface = select(1, ...)
   elseif #arg > 2 then
     local l = #arg
