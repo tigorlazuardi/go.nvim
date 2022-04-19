@@ -26,6 +26,10 @@ local function get_struct_name()
     vim.notify("No node found on cursor", "error", { title = "Treesitter Query Error" })
     return nil
   end
+  if cursor_node:type() ~= "type_identifier" then
+    vim.notify("Cursor is not hovering over a type name", "error", { title = "Select Node Error" })
+    return nil
+  end
   local parent = cursor_node:parent()
   local node
   while parent do
@@ -41,9 +45,7 @@ local function get_struct_name()
     return nil
   end
 
-  local type_spec = node:child(1)
-  local name_field = type_spec:field("name")[1]
-  local name = vim.treesitter.query.get_node_text(name_field, 0)
+  local name = vim.treesitter.query.get_node_text(cursor_node, 0)
   return get_initials(name) .. " *" .. name
 end
 
