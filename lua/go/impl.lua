@@ -31,6 +31,8 @@ local function get_struct_name()
     end
   end
 
+  vim.notify(vim.inspect(node))
+
   assert(node, "cursor is not currently in a type declaration section")
 
   local type_spec = node:child(1)
