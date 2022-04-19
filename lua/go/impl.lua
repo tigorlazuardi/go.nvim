@@ -29,7 +29,6 @@ local function get_struct_name()
   local parent = cursor_node:parent()
   local node
   while parent do
-    vim.notify(vim.inspect(parent:type()))
     if parent:type() == "type_declaration" then
       node = parent
       break
@@ -37,16 +36,14 @@ local function get_struct_name()
     parent = parent:parent()
   end
 
-  vim.notify(vim.inspect(node))
-
-  if node == nil then
+  if not node then
     vim.notify("cursor is not currently in a type declaration section", "error", { title = "Treesitter Query Error" })
     return nil
   end
 
   local type_spec = node:child(1)
   local name_field = type_spec:field("name")[1]
-  local name = vim.treesitter.query.get_node_text(name_field)[1]
+  local name = vim.treesitter.query.get_node_text(name_field, 0)
   return get_initials(name) .. " *" .. name
 
   -- local row, col = unpack(vim.api.nvim_win_get_cursor(0))
