@@ -5,6 +5,7 @@ local diagnostic_map = function(bufnr)
   local opts = { noremap = true, silent = true }
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
+local codelens_enabled = false
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -23,9 +24,11 @@ local on_attach = function(client, bufnr)
     client.resolved_capabilities.document_formatting = false
   end
 
-  codelens_enabled = client.resolved_capabilities["code_lens"]
-  if not codelens_enabled and _GO_NVIM_CFG.lsp_codelens then
-    vim.notify("failed to enable codelens", vim.lsp.log_levels.WARN)
+  if _GO_NVIM_CFG.lsp_codelens then
+    codelens_enabled = client.resolved_capabilities["code_lens"]
+    if not codelens_enabled then
+      vim.notify("codelens not support by your gopls", vim.lsp.log_levels.WARN)
+    end
   end
   if _GO_NVIM_CFG.lsp_keymaps == true then
     buf_set_keymap("n", "gD", ":lua vim.lsp.buf.formatting()<CR>", opts)
@@ -58,8 +61,8 @@ local gopls = require("go.gopls").setups()
 
 local extend_config = function(opts)
   opts = opts or {}
-  if next(opts) == nil then
-    return
+  if next(opts) == nil or gopls == nil then
+    return gopls
   end
   for key, value in pairs(opts) do
     if type(gopls[key]) == "table" then
@@ -84,6 +87,13 @@ function M.client()
 end
 
 function M.config()
+  if gopls == nil then
+    return
+  end
+  if _GO_NVIM_CFG == nil then
+    vim.notify("please setup go.nvim", vim.lsp.log_levels.WARN)
+    require'go'.setup{}
+  end
   gopls.on_attach = on_attach
   if type(_GO_NVIM_CFG.lsp_on_attach) == "function" then
     gopls.on_attach = _GO_NVIM_CFG.lsp_on_attach
@@ -184,5 +194,8 @@ end
 
 M.gopls_cfg = gopls
 M.gopls_on_attach = on_attach
+M.codelens_enabled = function()
+  return codelens_enabled
+end
 
 return M

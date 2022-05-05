@@ -167,7 +167,7 @@ function go.setup(cfg)
   vim.cmd([[command!          GoIfErr lua require("go.iferr").run()]])
   vim.cmd([[command!          GoFillStruct lua require("go.reftool").fillstruct()]])
   vim.cmd([[command!          GoFillSwitch lua require("go.reftool").fillswitch()]])
-  vim.cmd([[command!          GoFixPlurals lua require("go.reftool").fixplurals()]])
+  vim.cmd([[command!          GoFixPlurals lua require("go.fixplurals").fixplurals()]])
 
   vim.cmd([[command! -bang    GoAlt lua require"go.alternate".switch("<bang>"=="!", '')]])
   vim.cmd([[command! -bang    GoAltV lua require"go.alternate".switch("<bang>"=="!", 'vsplit')]])
@@ -193,6 +193,10 @@ function go.setup(cfg)
     vim.cmd([[command! DapUiToggle lua require("dapui").toggle()]])
 
     vim.cmd([[command! GoDbgStop lua require'go.dap'.stop()]])
+  end
+
+  if _GO_NVIM_CFG.run_in_floaterm then
+    vim.cmd([[command! -nargs=* GoTermClose lua require("go.term").close()]])
   end
 
   if _GO_NVIM_CFG.lsp_cfg then
