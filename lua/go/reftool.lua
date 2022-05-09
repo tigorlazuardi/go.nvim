@@ -25,7 +25,14 @@ local function insert_result(result)
   vim.cmd("write")
   -- format(#inserts, curpos)
   fn.setpos(".", curpos)
-  vim.lsp.buf.formatting()
+  vim.lsp.buf.format({
+    async = true,
+    filter = function(clients)
+      return vim.tbl_filter(function(c)
+        return c.name == "gopls"
+      end, clients)
+    end,
+  })
 end
 
 -- can only be fillstruct and fillswitch

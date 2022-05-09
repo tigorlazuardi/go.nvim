@@ -70,7 +70,14 @@ local M = {}
 M.gofmt = function(buf)
   if _GO_NVIM_CFG.gofmt == "gopls" then
     -- log("gopls format")
-    vim.lsp.buf.formatting()
+    vim.lsp.buf.format({
+      async = true,
+      filter = function(clients)
+        return vim.tbl_filter(function(c)
+          return c.name == "gopls"
+        end, clients)
+      end,
+    })
     return
   end
   vim.env.GO_FMT = "gofumpt"
@@ -85,7 +92,15 @@ end
 M.org_imports = function(wait_ms)
   local codeaction = require("go.lsp").codeaction
   codeaction("", "source.organizeImports", wait_ms)
-  vim.lsp.buf.formatting_sync(nil, wait_ms)
+  -- vim.lsp.buf.formatting_sync(nil, wait_ms)
+  vim.lsp.buf.format({
+    timeout_ms = wait_ms,
+    filter = function(clients)
+      return vim.tbl_filter(function(c)
+        return c.name == "gopls"
+      end, clients)
+    end,
+  })
 end
 
 M.goimport = function(...)
