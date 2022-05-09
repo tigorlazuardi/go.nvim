@@ -222,7 +222,7 @@ M.test_fun = function(...)
   end
 
   if _GO_NVIM_CFG.verbose_tests then
-    table.insert("-v")
+    table.insert(cmd, "-v")
   end
 
   if not empty(tags) then
